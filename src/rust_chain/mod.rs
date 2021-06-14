@@ -149,6 +149,50 @@ impl Blockchain {
 
 }
 
+impl Transaction {
+    pub fn new(from: String, transaction_data: TranasctionData, nonce: u128) -> Self {
+        Transaction{
+            from,
+            nonce,
+            record: transaction_data,
+            created_at: SystemTime::now(),
+            signature: None,
+        }
+    }
+
+    pub fn execute<T: WorldState> (&self, world_state: &mut T, is_inital: &bool) -> Result<(), &'static str>{
+        //Check if user is real lol
+        if let Some(_account) = world_state.get_account_by_id(&self.from){
+
+            //TODO: pattern match for ids and more
+
+        } else {
+                if !is_inital{
+                    return Err("Account does not exist (Error Code: 83902)");
+                }
+            }
+        return match &self.record{
+            //Check for which transaction here
+                TransactionData::CreateUserAccount(account) => {
+                    world_state.create_account(account.into(), AccountType::User)
+                }
+                TransactionData::CreateTokens{reciever, amount} => {
+                    if !is_inital{
+                        return Err("Token creation is only avaliable on inital creation (Error Code: 939291)");
+                    }
+
+                    return if let Some(account) = world_state.get_account_by_id_mut(reciever){
+                        account.tokens += *account;
+                        Ok(())
+                    } else {
+                        Err("Reciever account does not exist (Error Code: 48491)")
+                    }
+                }
+            }
+        }
+    }
+}
+
 impl Account {
     //Constructor
 

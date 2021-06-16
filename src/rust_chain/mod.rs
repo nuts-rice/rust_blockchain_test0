@@ -173,10 +173,10 @@ impl Transaction {
             }
         return match &self.record{
             //Check for which transaction here
-                TransactionData::CreateUserAccount(account) => {
+            TransactionData::CreateUserAccount(account) => {
                     world_state.create_account(account.into(), AccountType::User)
                 }
-                TransactionData::CreateTokens{reciever, amount} => {
+            TransactionData::CreateTokens{reciever, amount} => {
                     if !is_inital{
                         return Err("Token creation is only avaliable on inital creation (Error Code: 939291)");
                     }
@@ -186,8 +186,21 @@ impl Transaction {
                         Ok(())
                     } else {
                         Err("Reciever account does not exist (Error Code: 48491)")
-                    }
+                    };
                 }
+            TransactionData::TransferTokens{to, amount} => {
+                let recv_tokens: u128;
+                let sender_tokens: u128;
+                if let Some(recv) = world_state.get_account_by_id_mut(to) {
+                    recv_tokens = recv.tokens;
+
+                } else {
+                    return Err("Reciever account does not exist (Error Code: 48491)");
+                }
+
+                if let Some(sender) = world_state.account_by_id_mut(&self.from)
+            }
+
             }
         }
     }
